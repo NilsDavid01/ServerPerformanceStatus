@@ -13,7 +13,19 @@ echo "------------------------------------------------------"
 
 # Disk usage (total and per mountpoint)
 echo "Disk Usage:"
-df -h --total | awk 'END{printf "  Used: %s  Free: %s  Total: %s  (Across all mounted filesystems)\n", $3,$4,$2}'
+lsblk -b -d -o SIZE,NAME | awk '
+NR>1 { total+=$1; disks[$2]=$1 }
+END {
+  # get used space from df (excluding tmpfs/devtmpfs/overlay)
+  cmd="df -B1 -x tmpfs -x devtmpfs -x overlay --total | awk \"/total/{print \\$2,\\$3,\\$4}\""
+  cmd | getline line
+  split(line, vals, " ")
+  used=vals[2]; free=vals[3]
+
+  printf "  Used: %.2f GB  Free: %.2f GB  Total: %.2f GB (across all physical disks)\n", \
+         used/1024/1024/1024, free/1024/1024/1024, total/1024/1024/1024
+}'
+
 echo "------------------------------------------------------"
 
 # Memory usage
