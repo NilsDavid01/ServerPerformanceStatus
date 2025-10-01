@@ -11,6 +11,11 @@ echo "CPU Usage:"
 mpstat 1 1 | awk '/Average/ && $2 ~ /all/ {printf "  User: %.1f%%  System: %.1f%%  Idle: %.1f%%\n", $3, $5, $12}'
 echo "------------------------------------------------------"
 
+# Disk usage (total and per mountpoint)
+echo "Disk Usage:"
+df -h --total | awk 'END{printf "  Used: %s  Free: %s  Total: %s  (Across all mounted filesystems)\n", $3,$4,$2}'
+echo "------------------------------------------------------"
+
 # Memory usage
 echo "Memory Usage:"
 free -h | awk 'NR==2{printf "  Used: %s  Free: %s  Total: %s\n", $3,$4,$2}'
